@@ -25,22 +25,16 @@ const adminAuth = basicAuth({
 app.get("/check-participant/:id", async (req, res) => {
   try {
     const participantId = req.params.id.trim();
-    console.log("التحقق من المشارك برقم:", participantId);
-
     const count = await Member.count();
-    console.log("إجمالي الأعضاء في قاعدة البيانات:", count);
 
     if (count === 0) {
-      console.log("لم يتم العثور على أعضاء في قاعدة البيانات");
-      return res.json({ found: false, error: "قاعدة البيانات فارغة" });
+      return res.json({ found: false, error: "Database is empty" });
     }
 
     const member = await Member.findOne({ where: { phone: participantId } });
-    console.log("تم العثور على العضو:", member);
 
     if (member) {
       const winner = await Winner.findOne({ where: { phone: participantId } });
-      console.log("حالة الفائز:", winner ? "فاز" : "لم يفز");
 
       res.json({
         found: true,
@@ -52,7 +46,6 @@ app.get("/check-participant/:id", async (req, res) => {
       res.json({ found: false });
     }
   } catch (err) {
-    console.error("خطأ في التحقق من المشارك:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -63,7 +56,7 @@ app.post("/draw-prize", async (req, res) => {
 
     const member = await Member.findOne({ where: { phone: participantId } });
     if (!member) {
-      return res.status(404).json({ error: "لم يتم العثور على المشارك" });
+      return res.status(404).json({ error: "Participant not found" });
     }
 
     const existingWinner = await Winner.findOne({
@@ -71,7 +64,7 @@ app.post("/draw-prize", async (req, res) => {
     });
     if (existingWinner) {
       return res.status(400).json({
-        error: "المشارك فاز بالفعل",
+        error: "Participant has already won",
         alreadyWon: true,
         prize: existingWinner.prize,
         drawDate: existingWinner.drawDate,
@@ -80,7 +73,7 @@ app.post("/draw-prize", async (req, res) => {
 
     const prizeLimit = PRIZE_LIMITS[prize];
     if (!prizeLimit) {
-      return res.status(400).json({ error: "قيمة الجائزة غير صالحة" });
+      return res.status(400).json({ error: "Invalid prize amount" });
     }
 
     const prizeCount = await Winner.count({ where: { prize: prize } });
@@ -94,7 +87,7 @@ app.post("/draw-prize", async (req, res) => {
       }
 
       return res.status(400).json({
-        error: `تم الوصول إلى الحد الأقصى لجوائز ${prize} دينار`,
+        error: `Maximum limit reached for ${prize} Dinar prizes`,
         maxLimitReached: true,
         currentCount: prizeCount,
         limit: prizeLimit,
@@ -116,15 +109,6 @@ app.post("/draw-prize", async (req, res) => {
       remainingCounts[`${prizeAmount}DB`] = limit - count;
     }
 
-    console.log("تم حفظ الفائز الجديد:", {
-      id: winner.id,
-      phone: winner.phone,
-      name: winner.name,
-      prize: winner.prize,
-      drawDate: winner.drawDate,
-      remainingPrizes: remainingCounts,
-    });
-
     res.json({
       success: true,
       prize: winner.prize,
@@ -132,10 +116,10 @@ app.post("/draw-prize", async (req, res) => {
       remainingPrizes: remainingCounts,
     });
   } catch (err) {
-    console.error("خطأ في سحب الجائزة:", err);
     res.status(500).json({ error: err.message });
   }
 });
+
 app.get("/winners", async (req, res) => {
   try {
     const winners = await Winner.findAll({
@@ -151,14 +135,26 @@ app.get("/winners", async (req, res) => {
     }
 
     console.log(
-      "تم استرجاع الفائزين:",
+      "Winners retrieved:",
       winners.length,
-      "الجوائز المتبقية:",
+      "Remaining prizes:",
       remainingCounts
     );
     res.json(winners);
   } catch (err) {
-    console.error("خطأ في الحصول على الفائزين:", err);
+    console.error("Error retrieving winners:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete("/winners", adminAuth, async (req, res) => {
+  try {
+    const deletedCount = await Winner.destroy({ where: {} });
+
+    console.log(`Deleted ${deletedCount} winners.`);
+    res.json({ success: true, message: `Deleted ${deletedCount} winners.` });
+  } catch (err) {
+    console.error("Error deleting winners:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -191,7 +187,7 @@ app.get("/export/excel", adminAuth, async (req, res) => {
     const buffer = xlsx.write(wb, { type: "buffer", bookType: "xlsx" });
     res.send(buffer);
   } catch (err) {
-    console.error("خطأ في تصدير الفائزين:", err);
+    console.error("Error exporting winners:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -213,7 +209,7 @@ app.get("/export/json", adminAuth, async (req, res) => {
     jsContent += formattedMembers;
     jsContent += "\n]";
 
-    console.log("تم إنشاء محتوى members.js:", jsContent);
+    console.log("Generated members.js content:", jsContent);
 
     res.setHeader("Content-Type", "application/javascript");
     res.setHeader("Content-Disposition", "attachment; filename=members.js");
@@ -223,7 +219,7 @@ app.get("/export/json", adminAuth, async (req, res) => {
 
     res.send(jsContent);
   } catch (err) {
-    console.error("خطأ في تصدير الأعضاء:", err);
+    console.error("Error exporting members:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -231,13 +227,13 @@ app.get("/export/json", adminAuth, async (req, res) => {
 async function startServer() {
   try {
     await sequelize.sync({ alter: true });
-    console.log("تم مزامنة قاعدة البيانات بنجاح");
+    console.log("Database synchronized successfully");
 
     app.listen(3000, async () => {
-      console.log("الخادم يعمل على المنفذ 3000");
+      console.log("Server is running on port 3000");
     });
   } catch (err) {
-    console.error("خطأ في بدء الخادم:", err);
+    console.error("Error starting the server:", err);
     process.exit(1);
   }
 }

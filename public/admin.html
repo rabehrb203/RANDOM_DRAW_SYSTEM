@@ -30,7 +30,19 @@
       <h1>Random Draw System - Dashboard</h1>
 
       <div class="admin-section">
-        <h2>Prize Statistics</h2>
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin: 0px 16px;
+          "
+        >
+          <h2>Prize Statistics</h2>
+          <button onclick="deleteWinners()">Clear</button>
+        </div>
+
         <div class="stats-container">
           <div class="stat-card">
             <div class="stat-number" id="prize20Count">0</div>
@@ -157,6 +169,19 @@
           .catch((err) => console.error(err));
       }
 
+      async function deleteWinners() {
+        if (!confirm("Are you sure you want to delete all winners?")) return;
+
+        const response = await fetch("/winners", {
+          method: "DELETE",
+          headers: { Authorization: "Basic " + btoa("admin:admin123") },
+        });
+        const result = await response.json();
+
+        alert(result.message || "An error occurred while deleting");
+        location.reload();
+      }
+
       function updateStatistics(data) {
         const prize20 = data.filter((m) => m.prize === 20).length;
         const prize30 = data.filter((m) => m.prize === 30).length;
@@ -174,11 +199,11 @@
 
         data.forEach((member) => {
           const row = `<tr>
-                    <td>${member.name}</td>
-                    <td>${member.phone}</td>
-                    <td>${member.prize} DB</td>
-                    <td>${new Date(member.drawDate).toLocaleDateString()}</td>
-                </tr>`;
+                      <td>${member.name}</td>
+                      <td>${member.phone}</td>
+                      <td>${member.prize} DB</td>
+                      <td>${new Date(member.drawDate).toLocaleDateString()}</td>
+                  </tr>`;
           table.innerHTML += row;
         });
       }
