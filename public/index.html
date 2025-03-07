@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Random Draw System</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="initialSection" class="section">
+      <img
+        src="images/img-banner-landing-apps-sorteos.webp"
+        alt="Welcome Banner"
+        class="logo-image"
+      />
+      <h1>Random Draw System</h1>
+      <p>Register your attendance to participate in the prize draw</p>
+      <button onclick="showLoginSection()" class="enter-button">Login</button>
+    </div>
+
+    <div id="loginSection" class="section" style="display: none">
+      <img src="images/id_badge.png" alt="ID Badge" class="logo-image" />
+      <h1>Registration</h1>
+      <h2>Enter your ID number</h2>
+      <div class="login-form">
+        <input
+          type="text"
+          id="participantId"
+          placeholder="Enter your ID number"
+          maxlength="10"
+        />
+        <button onclick="checkParticipant()">Continue</button>
+      </div>
+    </div>
+
+    <div id="drawSection" class="section" style="display: none">
+      <img src="images/id_badge.png" alt="ID Badge" class="logo-image" />
+      <h1>Confirm Participation</h1>
+      <div class="participant-info">
+        <h2>Welcome</h2>
+        <h3 id="participantName" class="participant-name"></h3>
+      </div>
+      <button onclick="drawPrize()" class="draw-button">
+        Participate in Draw
+      </button>
+      <button onclick="goBack()" class="back-button">Back</button>
+    </div>
+
+    <div id="congratsSection" class="section" style="display: none">
+      <img src="images/id_badge.png" alt="ID Badge" class="logo-image" />
+      <div class="congrats-content">
+        <h1>Congratulations!</h1>
+        <div class="prize-animation">
+          <div class="prize-icon">🎉</div>
+        </div>
+        <p>Thank you for participating in the draw</p>
+        <p class="prize-text" id="prizeAmount"></p>
+        <p class="note-text">
+          Note: You have already received your prize. Thank you for
+          participating!
+        </p>
+      </div>
+      <button onclick="newRegistration()" class="register-button">
+        New Registration
+      </button>
+    </div>
+
+    <style>
+      .participant-info {
+        background: rgba(186, 98, 62, 0.1);
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+      }
+
+      .participant-name {
+        color: var(--primary-button-color);
+        font-size: 1.5rem;
+        margin: 10px 0;
+      }
+
+      .congrats-content {
+        animation: fadeInUp 0.5s ease-out;
+      }
+
+      .prize-animation {
+        margin: 30px 0;
+      }
+
+      .prize-icon {
+        font-size: 4rem;
+        animation: bounce 1s infinite;
+      }
+
+      .prize-text {
+        font-size: 1.5rem;
+        color: var(--primary-button-color);
+        font-weight: bold;
+        margin: 20px 0;
+      }
+
+      .note-text {
+        color: #666;
+        font-style: italic;
+        margin-top: 10px;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-20px);
+        }
+      }
+    </style>
+
+    <script src="script.js"></script>
+  </body>
+</html>
