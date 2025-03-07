@@ -268,7 +268,7 @@
             const a = document.createElement("a");
             a.style.display = "none";
             a.href = url;
-            a.download = "members.js";
+            a.download = "member.js";
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
@@ -282,7 +282,7 @@
                 "none";
               document.getElementById("loginSection").style.display = "flex";
             } else {
-              alert(`Error downloading members.js file: ${err.message}`);
+              alert(`Error downloading member.js file: ${err.message}`);
             }
           });
       }

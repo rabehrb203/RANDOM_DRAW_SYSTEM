@@ -209,10 +209,10 @@ app.get("/export/json", adminAuth, async (req, res) => {
     jsContent += formattedMembers;
     jsContent += "\n]";
 
-    console.log("Generated members.js content:", jsContent);
+    console.log("Generated member.js content:", jsContent);
 
     res.setHeader("Content-Type", "application/javascript");
-    res.setHeader("Content-Disposition", "attachment; filename=members.js");
+    res.setHeader("Content-Disposition", "attachment; filename=member.js");
     res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
     res.setHeader("Pragma", "no-cache");
     res.setHeader("Expires", "0");
