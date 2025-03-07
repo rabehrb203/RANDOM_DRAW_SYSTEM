@@ -1,12 +1,19 @@
+@font-face {
+  font-family: poppins;
+  src: url("/poppins.ttf");
+}
 :root {
   --h1-color: rgba(30, 34, 170, 1);
-  --h1-font-size: 2.2rem;
-  --h1-line-height: 1.2em;
+  --h1-font-size: 1.8rem;
+  --h1-line-height: 1em;
   --primary-button-color: #ba623e;
 }
-
+html,
 body {
-  font-family: "Cairo", "Arial", sans-serif;
+  overflow-x: hidden;
+}
+body {
+  font-family: "poppins", "Arial", sans-serif;
   margin: 0;
   padding: 0;
   min-height: 100vh;
@@ -20,11 +27,9 @@ body {
 }
 
 .section {
-  padding: 40px;
+  padding: 4px;
   width: 90%;
-  max-width: 800px;
-  margin: 20px;
-  border-radius: 15px;
+  max-width: 95%;
   text-align: center;
   display: flex;
   justify-content: center;
@@ -34,7 +39,7 @@ body {
 }
 
 .logo-image {
-  width: 180px;
+  width: 140px;
   height: auto;
   margin-bottom: 30px;
   transition: transform 0.3s ease;
@@ -57,14 +62,16 @@ h2,
 h3 {
   color: #333;
   margin-bottom: 15px;
+  font-size: 0.8rem;
+
   font-weight: 600;
 }
 
 p {
   color: #666;
   margin-bottom: 25px;
-  font-size: 1.1rem;
-  line-height: 1.6;
+  font-size: 0.8rem;
+  line-height: 1.2;
 }
 
 .login-form {
@@ -108,7 +115,7 @@ button {
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   transition: all 0.3s ease;
   background-color: var(--primary-button-color);
@@ -227,7 +234,7 @@ tr:hover {
   }
 
   .logo-image {
-    width: 140px;
+    width: 100px;
   }
 
   button {
