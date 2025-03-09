@@ -21,7 +21,7 @@
         alt="Welcome Banner"
         class="logo-image"
       />
-      <h1>Random Draw System</h1>
+      <h1>Registration</h1>
       <p>Register your attendance to participate in the prize draw</p>
       <button onclick="showLoginSection()" class="enter-button">Login</button>
     </div>
@@ -37,7 +37,20 @@
           placeholder="Enter your ID number"
           maxlength="10"
         />
-        <button onclick="checkParticipant()">Continue</button>
+        <div id="customKeyboard">
+          <button onclick="insertCharacter('1')">1</button>
+          <button onclick="insertCharacter('2')">2</button>
+          <button onclick="insertCharacter('3')">3</button>
+          <button onclick="insertCharacter('4')">4</button>
+          <button onclick="insertCharacter('5')">5</button>
+          <button onclick="insertCharacter('6')">6</button>
+          <button onclick="insertCharacter('7')">7</button>
+          <button onclick="insertCharacter('8')">8</button>
+          <button onclick="insertCharacter('9')">9</button>
+          <button onclick="deleteCharacter()">⌫</button>
+          <button onclick="insertCharacter('0')">0</button>
+          <button onclick="checkParticipant()">Continue</button>
+        </div>
       </div>
     </div>
 

@@ -6,6 +6,16 @@ function showLoginSection() {
   });
 }
 
+const inputField = document.getElementById("participantId");
+
+function insertCharacter(char) {
+  inputField.value += char;
+}
+
+function deleteCharacter() {
+  inputField.value = inputField.value.slice(0, -1);
+}
+
 function checkParticipant() {
   const participantId = document.getElementById("participantId").value;
   if (!participantId) {
