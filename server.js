@@ -11,9 +11,9 @@ app.use(express.json());
 app.use(express.static("public"));
 
 const PRIZE_LIMITS = {
-  20: 4,
-  30: 4,
-  40: 4,
+  20: 500,
+  30: 60,
+  40: 40,
 };
 
 const adminAuth = basicAuth({
