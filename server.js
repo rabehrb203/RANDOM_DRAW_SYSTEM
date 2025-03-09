@@ -11,15 +11,125 @@ app.use(express.json());
 app.use(express.static("public"));
 
 const PRIZE_LIMITS = {
-  20: 500,
-  30: 60,
-  40: 40,
+  20: 4,
+  30: 4,
+  40: 4,
 };
 
 const adminAuth = basicAuth({
   users: { admin: "admin123" },
   challenge: true,
   realm: "Admin Area",
+});
+
+app.get("/prizes-remaining", async (req, res) => {
+  try {
+    const counts = await Winner.findAll({
+      attributes: [
+        "prize",
+        [sequelize.fn("COUNT", sequelize.col("prize")), "count"],
+      ],
+      group: ["prize"],
+      raw: true,
+    });
+
+    let remaining = {
+      40: PRIZE_LIMITS[40],
+      30: PRIZE_LIMITS[30],
+      20: PRIZE_LIMITS[20],
+    };
+    counts.forEach((row) => {
+      remaining[row.prize] -= row.count;
+    });
+
+    res.json(remaining);
+  } catch (error) {
+    console.error("Error fetching prize data:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+const fetchPrizeLimits = async () => {
+  const limits = await Prize.findAll({
+    attributes: ["prize", "limit"],
+    raw: true,
+  });
+
+  return limits.reduce((acc, row) => {
+    acc[row.prize] = row.limit;
+    return acc;
+  }, {});
+};
+app.post("/draw-prize", async (req, res) => {
+  try {
+    const { participantId } = req.body;
+
+    const member = await Member.findOne({ where: { phone: participantId } });
+    if (!member) {
+      return res.status(404).json({ error: "Participant not found" });
+    }
+
+    const existingWinner = await Winner.findOne({
+      where: { phone: participantId },
+    });
+    if (existingWinner) {
+      return res.status(400).json({
+        error: "Participant has already won",
+        alreadyWon: true,
+        prize: existingWinner.prize,
+        drawDate: existingWinner.drawDate,
+      });
+    }
+
+    const counts = await Winner.findAll({
+      attributes: [
+        "prize",
+        [sequelize.fn("COUNT", sequelize.col("prize")), "count"],
+      ],
+      group: ["prize"],
+      raw: true,
+    });
+
+    let remainingPrizes = {
+      40: PRIZE_LIMITS[40],
+      30: PRIZE_LIMITS[30],
+      20: PRIZE_LIMITS[20],
+    };
+    counts.forEach((row) => {
+      remainingPrizes[row.prize] -= row.count;
+    });
+
+    const availablePrizes = [];
+    if (remainingPrizes[40] > 0) availablePrizes.push(...Array(40).fill(40));
+    if (remainingPrizes[30] > 0) availablePrizes.push(...Array(40).fill(30));
+    if (remainingPrizes[20] > 0) availablePrizes.push(...Array(20).fill(20));
+
+    if (availablePrizes.length === 0) {
+      return res.status(400).json({
+        error: "All prizes have been awarded",
+        maxLimitReached: true,
+        remainingPrizes,
+      });
+    }
+
+    const selectedPrize =
+      availablePrizes[Math.floor(Math.random() * availablePrizes.length)];
+
+    const winner = await Winner.create({
+      phone: member.phone,
+      name: member.name,
+      prize: selectedPrize,
+    });
+
+    res.json({
+      success: true,
+      prize: winner.prize,
+      drawDate: winner.drawDate,
+      remainingPrizes,
+    });
+  } catch (err) {
+    console.error("Error processing draw-prize:", err);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 app.get("/check-participant/:id", async (req, res) => {
@@ -49,77 +159,6 @@ app.get("/check-participant/:id", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-app.post("/draw-prize", async (req, res) => {
-  try {
-    const { participantId, prize } = req.body;
-
-    const member = await Member.findOne({ where: { phone: participantId } });
-    if (!member) {
-      return res.status(404).json({ error: "Participant not found" });
-    }
-
-    const existingWinner = await Winner.findOne({
-      where: { phone: participantId },
-    });
-    if (existingWinner) {
-      return res.status(400).json({
-        error: "Participant has already won",
-        alreadyWon: true,
-        prize: existingWinner.prize,
-        drawDate: existingWinner.drawDate,
-      });
-    }
-
-    const prizeLimit = PRIZE_LIMITS[prize];
-    if (!prizeLimit) {
-      return res.status(400).json({ error: "Invalid prize amount" });
-    }
-
-    const prizeCount = await Winner.count({ where: { prize: prize } });
-    if (prizeCount >= prizeLimit) {
-      const remainingCounts = {};
-      for (const [prizeAmount, limit] of Object.entries(PRIZE_LIMITS)) {
-        const count = await Winner.count({
-          where: { prize: parseInt(prizeAmount) },
-        });
-        remainingCounts[`${prizeAmount}DB`] = limit - count;
-      }
-
-      return res.status(400).json({
-        error: `Maximum limit reached for ${prize} Dinar prizes`,
-        maxLimitReached: true,
-        currentCount: prizeCount,
-        limit: prizeLimit,
-        remainingPrizes: remainingCounts,
-      });
-    }
-
-    const winner = await Winner.create({
-      phone: member.phone,
-      name: member.name,
-      prize: prize,
-    });
-
-    const remainingCounts = {};
-    for (const [prizeAmount, limit] of Object.entries(PRIZE_LIMITS)) {
-      const count = await Winner.count({
-        where: { prize: parseInt(prizeAmount) },
-      });
-      remainingCounts[`${prizeAmount}DB`] = limit - count;
-    }
-
-    res.json({
-      success: true,
-      prize: winner.prize,
-      drawDate: winner.drawDate,
-      remainingPrizes: remainingCounts,
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 app.get("/winners", async (req, res) => {
   try {
     const winners = await Winner.findAll({

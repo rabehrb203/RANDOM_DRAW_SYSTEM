@@ -45,41 +45,69 @@ function drawPrize() {
 
   showLoading();
 
-  const prizes = [20, 30, 40];
-  const randomPrize = prizes[Math.floor(Math.random() * prizes.length)];
+  fetch("/prizes-remaining")
+    .then((res) => {
+      console.log("Prizes Remaining Raw Response:", res);
+      if (!res.ok) {
+        throw new Error(`HTTP error! Status: ${res.status}`);
+      }
+      return res.json();
+    })
+    .then((remainingPrizes) => {
+      const availablePrizes = [];
 
-  fetch("/draw-prize", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      participantId: currentParticipant.id,
-      prize: randomPrize,
-    }),
-  })
-    .then((res) => res.json())
+      if (remainingPrizes[30] > 0) availablePrizes.push(30, 30, 30);
+      if (remainingPrizes[20] > 0) availablePrizes.push(20);
+      if (remainingPrizes[40] > 0) availablePrizes.push(40, 40, 40);
+
+      console.log("Available Prizes:", availablePrizes);
+
+      if (availablePrizes.length === 0) {
+        hideLoading();
+        showNotification("Thank you, you have entered the raffle!", "error");
+        return Promise.reject("No prizes left");
+      }
+
+      const randomPrize =
+        availablePrizes[Math.floor(Math.random() * availablePrizes.length)];
+
+      return fetch("/draw-prize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          participantId: currentParticipant.id,
+          prize: randomPrize,
+        }),
+      });
+    })
+    .then((res) => {
+      console.log("Draw Prize Raw Response:", res);
+      if (!res.ok) {
+        throw new Error(`HTTP error! Status: ${res.status}`);
+      }
+      return res.json();
+    })
     .then((data) => {
       hideLoading();
+
       if (data.alreadyWon) {
         showNotification("You have already received your prize", "error");
         goBack();
         return;
       }
+
       if (data.maxLimitReached) {
-        const remaining = data.remainingPrizes;
-        let message = "This prize category is full. Remaining prizes:\n";
-        for (const [prize, count] of Object.entries(remaining)) {
-          if (count > 0) {
-            message += `${prize}: ${count} winners remaining\n`;
-          }
-        }
-        showNotification(message, "error");
+        showNotification(
+          `Sorry, all ${data.prize} DB prizes have been claimed!`,
+          "error"
+        );
         return;
       }
+
       document.getElementById(
         "prizeAmount"
-      ).textContent = `Congratulations! You won ${randomPrize} DB!`;
+      ).textContent = `Congratulations! You won ${data.prize} DB!`;
+
       fadeOut("drawSection", () => {
         fadeIn("congratsSection");
         playConfetti();
@@ -87,7 +115,6 @@ function drawPrize() {
     })
     .catch((err) => {
       hideLoading();
-      showNotification("System error occurred", "error");
       console.error(err);
     });
 }
