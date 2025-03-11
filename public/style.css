@@ -27,7 +27,7 @@ body {
   align-items: center;
   position: relative;
   width: 100vw;
-  overflow-x: auto;
+  /* overflow-x: auto; */
 }
 
 body::after {
