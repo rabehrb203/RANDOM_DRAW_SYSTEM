@@ -108,7 +108,7 @@ function drawPrize() {
 
       if (data.maxLimitReached) {
         showNotification(
-          `Sorry, all ${data.prize} DB prizes have been claimed!`,
+          `Sorry, all ${data.prize} BD prizes have been claimed!`,
           "error"
         );
         return;
@@ -116,7 +116,7 @@ function drawPrize() {
 
       document.getElementById(
         "prizeAmount"
-      ).textContent = `Congratulations! You won ${data.prize} DB!`;
+      ).textContent = `Congratulations! You won ${data.prize} BD!`;
 
       fadeOut("drawSection", () => {
         fadeIn("congratsSection");

@@ -170,7 +170,7 @@ app.get("/winners", async (req, res) => {
       const count = await Winner.count({
         where: { prize: parseInt(prizeAmount) },
       });
-      remainingCounts[`${prizeAmount}DB`] = limit - count;
+      remainingCounts[`${prizeAmount}BD`] = limit - count;
     }
 
     console.log(
