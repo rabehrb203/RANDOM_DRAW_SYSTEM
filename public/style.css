@@ -17,14 +17,32 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
+  min-width: 550px; /* إجبار الحد الأدنى للعرض */
   background-image: url("images/background.svg");
   background-size: cover;
   background-repeat: no-repeat;
-  background-position: top center;
+  background-position: center center;
   background-attachment: fixed;
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
+  width: 100vw;
+  overflow-x: auto; /* السماح بالتمرير الأفقي إذا كان العرض أقل من 550px */
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  top: 12px;
+  right: 8px;
+  width: 285px;
+  height: 42px;
+  background-image: url("images/logo.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: -1;
 }
 
 .section {
@@ -248,10 +266,6 @@ tr:hover {
 
   .logo-image {
     width: 100px;
-  }
-
-  body {
-    background-position: -662px center;
   }
 
   button {
