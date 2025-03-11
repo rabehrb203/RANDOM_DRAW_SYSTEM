@@ -17,7 +17,6 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  min-width: 550px; /* إجبار الحد الأدنى للعرض */
   background-image: url("images/background.svg");
   background-size: cover;
   background-repeat: no-repeat;
@@ -28,7 +27,7 @@ body {
   align-items: center;
   position: relative;
   width: 100vw;
-  overflow-x: auto; /* السماح بالتمرير الأفقي إذا كان العرض أقل من 550px */
+  overflow-x: auto;
 }
 
 body::after {
