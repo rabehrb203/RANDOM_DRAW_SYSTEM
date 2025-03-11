@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(express.static("public"));
 
 const PRIZE_LIMITS = {
-  20: 500,
+  20: 1000,
   30: 60,
   40: 40,
 };
